@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Scheduler</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .event {
+      margin-bottom: 10px;
+      padding: 10px;
+      background-color: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .event span {
+      font-weight: bold;
+    }
+
+    .conflict {
+      color: red;
+    }
+
+    #eventForm {
+      margin-bottom: 20px;
+    }
+
+    #eventList {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Event Scheduler</h1>
+  <div id="eventForm">
+    <input type="text" id="eventName" placeholder="Event Name" required />
+    <input type="time" id="startTime" required />
+    <input type="time" id="endTime" required />
+    <button onclick="addEvent()">Add Event</button>
+  </div>
+
+  <div id="eventList">
+    <h2>Sorted Schedule</h2>
+    <ul id="eventListContainer"></ul>
+  </div>
+
+  <div id="conflicts">
+    <h2>Conflicts</h2>
+    <ul id="conflictList"></ul>
+  </div>
+
+  <script>
+    let events = [];
+
+    // Function to add an event
+    function addEvent() {
+      const eventName = document.getElementById('eventName').value;
+      const startTime = document.getElementById('startTime').value;
+      const endTime = document.getElementById('endTime').value;
+
+      if (!eventName || !startTime || !endTime) {
+        alert("Please fill all fields.");
+        return;
+      }
+
+      const event = {
+        name: eventName,
+        start: startTime,
+        end: endTime
+      };
+
+      events.push(event);
+      events.sort((a, b) => a.start.localeCompare(b.start));
+      displaySchedule();
+      detectConflicts();
+    }
+
+    // Function to display the schedule
+    function displaySchedule() {
+      const eventListContainer = document.getElementById('eventListContainer');
+      eventListContainer.innerHTML = '';
+      events.forEach(event => {
+        const eventItem = document.createElement('li');
+        eventItem.classList.add('event');
+        eventItem.innerHTML = <span>${event.name}</span>: ${event.start} - ${event.end};
+        eventListContainer.appendChild(eventItem);
+      });
+    }
+
+    // Function to detect conflicts
+    function detectConflicts() {
+      const conflictList = document.getElementById('conflictList');
+      conflictList.innerHTML = '';
+
+      let conflictsFound = false;
+      for (let i = 0; i < events.length - 1; i++) {
+        for (let j = i + 1; j < events.length; j++) {
+          const eventA = events[i];
+          const eventB = events[j];
+
+          if (eventA.end > eventB.start && eventA.start < eventB.end) {
+            const conflictItem = document.createElement('li');
+            conflictItem.classList.add('conflict');
+            conflictItem.textContent = ${eventA.name} conflicts with ${eventB.name};
+
+            conflictList.appendChild(conflictItem);
+            conflictsFound = true;
+          }
+        }
+      }
+
+      if (!conflictsFound) {
+        conflictList.innerHTML = '<li>No conflicts detected.</li>';
+      }
+    }
+  </script>
+</body>
+</html>
